@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { plainToInstance } from 'class-transformer';
 import { Country } from './model/country';
+import { CountryIntegrationException } from '../exception/country-integration-exception';
+import { CountryNotFoundException } from '../exception/country-not-found-exception';
 
 @Injectable()
 export class CountryClient {
@@ -15,7 +17,7 @@ export class CountryClient {
         return plainToInstance(Country, countryRaw);
       });
     } catch (error) {
-      throw error;
+      throw new CountryIntegrationException(error.message);
     }
   }
 
@@ -29,7 +31,11 @@ export class CountryClient {
         return plainToInstance(Country, responseCountry.data[0]);
       }
     } catch (error) {
-      throw error;
+      if (error.response && error.response.status === 404) {
+        throw new CountryNotFoundException('Country not found with name ' + countryName);
+      }
+
+      throw new CountryIntegrationException(error.message);
     }
   }
 }
