@@ -1,3 +1,4 @@
+import { ServiceUnavailableResponse } from '@app/common/contract/model/service-unavailable-response';
 import {
   ClassSerializerInterceptor,
   Controller,
@@ -5,17 +6,17 @@ import {
   Param,
   UseInterceptors,
 } from '@nestjs/common';
-import { CountryService } from './country.service';
-import { CountriesResponse } from './contract/model/response/countries';
-import { CountryDetailResponse } from './contract/model/response/country-detail';
 import {
-  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
-  ApiResponse,
-  ApiTags,
+  ApiServiceUnavailableResponse,
+  ApiTags
 } from '@nestjs/swagger';
+import { NotFoundResponse } from '../common/contract/model/not-found-response';
+import { CountriesResponse } from './contract/model/response/countries';
+import { CountryDetailResponse } from './contract/model/response/country-detail';
+import { CountryService } from './country.service';
 
 @ApiTags('countries')
 @Controller('countries')
@@ -28,7 +29,7 @@ export class CountryController {
     description: 'All countries are successfully retrieved',
     type: CountriesResponse,
   })
-  @ApiInternalServerErrorResponse({ description: 'Internal error' })
+  @ApiServiceUnavailableResponse({ description: 'Internal error', type: ServiceUnavailableResponse })
   public getAllCountries(): Promise<CountriesResponse> {
     return this.countryService.getAllCountries();
   }
@@ -39,8 +40,8 @@ export class CountryController {
     description: 'Country details is successfully retrieved',
     type: CountryDetailResponse,
   })
-  @ApiNotFoundResponse({ description: 'Country is not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal error' })
+  @ApiNotFoundResponse({ description: 'Country is not found', type: NotFoundResponse })
+  @ApiServiceUnavailableResponse({ description: 'Internal error', type: ServiceUnavailableResponse })
   public getCountryByName(
     @Param('nameOrCode') countryNameOrCode: string,
   ): Promise<CountryDetailResponse> {
